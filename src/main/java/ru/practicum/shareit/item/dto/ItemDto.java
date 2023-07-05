@@ -22,5 +22,5 @@ public class ItemDto {
     private long requestId;
 
     @NotNull(message = "Необходимо указать статус доступности вещи для аренды")
-    private boolean isAvailable;
+    private Boolean available;
 }
