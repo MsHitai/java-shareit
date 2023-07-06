@@ -1,19 +1,18 @@
 package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ItemService {
-    Item saveItem(ItemDto itemDto, Long userId);
+    ItemDto saveItem(ItemDto itemDto, Long userId);
 
-    Item partialUpdateItem(Map<String, Object> updates, Item item);
+    ItemDto partialUpdateItem(Map<String, Object> updates, long itemId, long userId);
 
-    Item findById(long itemId);
+    ItemDto findById(long itemId, long userId);
 
-    List<Item> findAllItems(Long userId);
+    List<ItemDto> findAllItems(Long userId);
 
-    List<Item> searchItems(String text, Long userId);
+    List<ItemDto> searchItems(String text, Long userId);
 }

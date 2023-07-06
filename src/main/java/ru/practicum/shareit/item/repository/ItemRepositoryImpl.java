@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DataNotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
@@ -16,10 +18,10 @@ public class ItemRepositoryImpl implements ItemRepository {
     private long id = 0;
 
     @Override
-    public Item save(Item item) {
+    public ItemDto save(Item item) {
         item.setId(++id);
         items.put(item.getId(), item);
-        return item;
+        return ItemMapper.mapToItemDto(item);
     }
 
     @Override
@@ -34,24 +36,26 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Item partialUpdateItem(Map<String, Object> updates, Item itemOld) {
+    public ItemDto partialUpdateItem(Map<String, Object> updates, Item itemOld) {
         patchItem(updates, itemOld);
-        return itemOld;
+        return ItemMapper.mapToItemDto(itemOld);
     }
 
     @Override
-    public List<Item> findAllItems(Long userId) {
+    public List<ItemDto> findAllItems(Long userId) {
         return items.values().stream()
                 .filter(item -> item.getOwnerId() == userId)
+                .map(ItemMapper::mapToItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> searchItems(String text, Long userId) {
+    public List<ItemDto> searchItems(String text, Long userId) {
         return items.values().stream()
                 .filter(item -> item.getDescription().toLowerCase().contains(text)
                         || item.getName().toLowerCase().contains(text))
                 .filter(Item::isAvailable)
+                .map(ItemMapper::mapToItemDto)
                 .collect(Collectors.toList());
     }
 

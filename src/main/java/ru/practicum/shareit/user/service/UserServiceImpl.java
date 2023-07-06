@@ -12,37 +12,38 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository repository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<User> getAllUsers() {
-        return repository.findAll();
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll();
     }
 
     @Override
-    public User saveUser(UserDto userDto) {
+    public UserDto saveUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto);
-        return repository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
-    public User findById(long id) {
-        return repository.findById(id);
+    public UserDto findById(long id) {
+        User user = userRepository.findById(id);
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
-    public User partialUpdateUser(UserDto userDto, long id) {
-        User userToPatch = findById(id);
+    public UserDto partialUpdateUser(UserDto userDto, long id) {
+        User userToPatch = userRepository.findById(id);
         User user = UserMapper.mapToUser(userDto);
         if (userToPatch.getEmail().equals(user.getEmail())) {
-            return userToPatch;
+            return UserMapper.mapToUserDto(userToPatch);
         }
-        return repository.partialUpdateUser(user, userToPatch);
+        return userRepository.partialUpdateUser(user, userToPatch);
     }
 
     @Override
     public void deleteUser(long id) {
-        User user = findById(id);
-        repository.deleteUser(user);
+        User user = userRepository.findById(id);
+        userRepository.deleteUser(user);
     }
 }

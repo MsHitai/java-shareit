@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -23,26 +22,26 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         log.debug("Получен запрос GET на получение всех пользователей");
         return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public User findById(@PathVariable(required = false) long id) {
+    public UserDto findById(@PathVariable(required = false) long id) {
         log.debug("Получен запрос GET на получение пользователя по id {}", id);
         return userService.findById(id);
     }
 
     @PostMapping()
-    public User saveUser(@Valid @RequestBody UserDto userDto) {
+    public UserDto saveUser(@Valid @RequestBody UserDto userDto) {
         log.debug("Получен запрос POST на создание пользователя {}", userDto.toString());
         return userService.saveUser(userDto);
     }
 
     @PatchMapping("/{id}")
-    public User partialUpdateUser(@RequestBody UserDto userDto,
-                                  @PathVariable(required = false) long id) {
+    public UserDto partialUpdateUser(@RequestBody UserDto userDto,
+                                     @PathVariable(required = false) long id) {
         log.debug("Получен запрос PATCH на обновление пользователя по id {}", id);
         return userService.partialUpdateUser(userDto, id);
     }

@@ -3,12 +3,14 @@ package ru.practicum.shareit.user.repository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DataConflictException;
 import ru.practicum.shareit.exception.DataNotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -17,16 +19,17 @@ public class UserRepositoryImpl implements UserRepository {
     private long id = 0;
 
     @Override
-    public List<User> findAll() {
-        return new ArrayList<>(users.values());
+    public List<UserDto> findAll() {
+        return users.values().stream().map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User save(User user) {
+    public UserDto save(User user) {
         checkDuplicateEmail(user);
         user.setId(++id);
         users.put(user.getId(), user);
-        return user;
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
@@ -41,9 +44,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User partialUpdateUser(User user, User userToPatch) {
+    public UserDto partialUpdateUser(User user, User userToPatch) {
         patchUser(userToPatch, user);
-        return userToPatch;
+        return UserMapper.mapToUserDto(userToPatch);
     }
 
     @Override
