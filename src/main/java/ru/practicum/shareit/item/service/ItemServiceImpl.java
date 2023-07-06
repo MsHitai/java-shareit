@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
@@ -26,8 +27,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto saveItem(ItemDto itemDto, Long userId) {
-        checkUserId(userId);
-        Item item = ItemMapper.mapToItem(itemDto, userId);
+        User user = userRepository.findById(userId);
+        Item item = ItemMapper.mapToItem(itemDto, user);
         return itemRepository.save(item);
     }
 
@@ -35,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto partialUpdateItem(Map<String, Object> updates, long itemId, long userId) {
         checkUserId(userId);
         Item item = itemRepository.findById(itemId);
-        if (item.getOwnerId() != userId) {
+        if (item.getOwner().getId() != userId) {
             throw new DataNotFoundException("У пользователя по id " + userId + " нет такой вещи по id " + item.getId());
         }
         return itemRepository.partialUpdateItem(updates, item);
