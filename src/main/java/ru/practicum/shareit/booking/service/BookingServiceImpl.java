@@ -32,6 +32,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
         User user = checkUserId(userId);
         Item item = checkItem(bookingDto.getItemId());
+        if (userId == item.getId()) {
+            throw new DataNotFoundException("Владелец не может арендовать свою вещь"); // Postman ожидает 404 в тесте
+        }
         Booking booking = BookingMapper.mapToBooking(bookingDto, user, item, Status.WAITING);
         return BookingMapper.mapToBookingDto(bookingRepository.save(booking));
     }

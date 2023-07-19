@@ -25,7 +25,7 @@ public class Booking {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User booker;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;
 

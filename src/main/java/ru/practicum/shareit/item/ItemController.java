@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForUserDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -40,8 +41,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @PathVariable(required = false) Long itemId) {
+    public ItemForUserDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                   @PathVariable(required = false) Long itemId) {
         log.debug("Получен запрос GET на получение вещи по id {}", itemId);
         return itemService.findById(itemId, userId);
     }
