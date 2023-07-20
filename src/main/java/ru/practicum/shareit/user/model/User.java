@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,5 +28,6 @@ public class User {
     private String email;
 
     @OneToMany
+    @JsonIgnore
     private Set<Item> items;
 }

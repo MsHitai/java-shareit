@@ -2,10 +2,12 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.item.model.Comment;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
 @Data
 @Builder
@@ -21,4 +23,6 @@ public class ItemDto {
 
     @NotNull(message = "Необходимо указать статус доступности вещи для аренды")
     private Boolean available;
+
+    private Set<Comment> comments;
 }

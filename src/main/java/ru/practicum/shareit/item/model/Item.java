@@ -26,9 +26,14 @@ public class Item {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinTable(
+            name = "users_items",
+            joinColumns = {@JoinColumn(name = "item_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")}
+    )
     private User user;
 
     @Column(name = "available", nullable = false)
     private boolean available;
+
 }
