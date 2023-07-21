@@ -1,16 +1,16 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,4 +37,22 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return id == booking.id
+                && Objects.equals(booker, booking.booker)
+                && Objects.equals(item, booking.item)
+                && Objects.equals(start, booking.start)
+                && Objects.equals(end, booking.end)
+                && status == booking.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, booker, item, start, end, status);
+    }
 }

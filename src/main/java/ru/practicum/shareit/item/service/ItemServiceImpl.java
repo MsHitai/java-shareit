@@ -1,15 +1,14 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.dto.BookerAndItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.DataNotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemForUserDto;
@@ -78,13 +77,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemForUserDto> findAllItems(Long userId) {
         checkUserId(userId);
-        return itemRepository.findAllItemsByUser(userId)
-                .stream()
-                .map(item -> findByIdForUser(item,
-                        commentRepository.findAllByItemId(item.getId())
-                                .stream()
-                                .map(CommentMapper::mapToCommentDto)
-                                .collect(Collectors.toList())))
+        return itemRepository.findAllItemsByUser(userId).stream()
+                .map(item -> findByIdForUser(item, item.getComments()
+                        .stream()
+                        .map(CommentMapper::mapToCommentDto)
+                        .collect(Collectors.toList())))
                 .sorted(Comparator.comparing(ItemForUserDto::getId))
                 .collect(Collectors.toList());
     }
@@ -105,15 +102,15 @@ public class ItemServiceImpl implements ItemService {
         Item item = checkItemId(itemId);
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings = bookingRepository.findByBookerIdAndItemIdAndEndBeforeOrderByEndDesc(userId,
-                itemId, now); // not unique result
+                itemId, now);
 
         if (bookings == null || bookings.size() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пользователь с id " + userId +
+            throw new ValidationException("Пользователь с id " + userId +
                     " не брал в аренду вещь по id " + itemId);
         }
 
         if (bookings.get(0).getEnd().isAfter(now)) { // если у последней аренды срок еще не вышел
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пользователь с id " + userId +
+            throw new ValidationException("Пользователь с id " + userId +
                     " еще не вернул из аренды вещь по id " + itemId);
         }
 

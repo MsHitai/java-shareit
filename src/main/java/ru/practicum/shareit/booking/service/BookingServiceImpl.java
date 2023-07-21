@@ -1,22 +1,22 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.DataNotFoundException;
-import ru.practicum.shareit.exception.UnsupportedStatusException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
             throw new DataNotFoundException("Пользователь с id " + userId + " не владелей вещи по id " + itemId);
         }
         if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Бронь по id " + bookingId + " уже одобрена");
+            throw new ValidationException("Бронь по id " + bookingId + " уже одобрена");
         }
         if (approved) {
             booking.setStatus(Status.APPROVED);
@@ -73,71 +73,71 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findAllBookingsByUser(Long userId, String state) {
+    public List<BookingDto> findAllBookingsByUser(Long userId, BookingState state) {
         User user = checkUserId(userId);
         switch (state) {
-            case "ALL":
+            case ALL:
                 return bookingRepository.findAllByBookerOrderByStartDesc(user)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user,
                                 LocalDateTime.now(), LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "PAST":
+            case PAST:
                 return bookingRepository.findAllByBookerAndEndBeforeOrderByEndDesc(user, LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.findAllByBookerAndStatusEqualsOrderByStartDesc(user, Status.WAITING)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.findAllByBookerAndStatusEqualsOrderByStartDesc(user, Status.REJECTED)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
             default:
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                return new ArrayList<>();
         }
     }
 
     @Override
-    public List<BookingDto> findAllBookingsByOwner(Long userId, String state) {
+    public List<BookingDto> findAllBookingsByOwner(Long userId, BookingState state) {
         checkUserId(userId);
         List<Item> items = itemRepository.findAllItemsByUser(userId);
         switch (state) {
-            case "ALL":
+            case ALL:
                 return bookingRepository.findAllByItemInOrderByStartDesc(items)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.findAllByItemInAndStartBeforeAndEndAfterOrderByStartDesc(items,
                                 LocalDateTime.now(), LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "PAST":
+            case PAST:
                 return bookingRepository.findAllByItemInAndEndBeforeOrderByEndDesc(items, LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.findAllByItemInAndStartAfterOrderByStartDesc(items, LocalDateTime.now())
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.findAllByItemInAndStatusEqualsOrderByStartDesc(items, Status.WAITING)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.findAllByItemInAndStatusEqualsOrderByStartDesc(items, Status.REJECTED)
                         .stream().map(BookingMapper::mapToBookingDto)
                         .collect(Collectors.toList());
             default:
-                throw new UnsupportedStatusException("Unknown state: UNSUPPORTED_STATUS");
+                return new ArrayList<>();
         }
     }
 
@@ -169,7 +169,7 @@ public class BookingServiceImpl implements BookingService {
             throw new DataNotFoundException("Вещи с id " + itemId + " нет в базе данных");
         }
         if (!item.isAvailable()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Вещь с id " + itemId + " не доступна для брони");
+            throw new ValidationException("Вещь с id " + itemId + " не доступна для брони");
         }
         return item;
     }
