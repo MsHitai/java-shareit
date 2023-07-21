@@ -38,7 +38,7 @@ public class Item {
     @Column(name = "available", nullable = false)
     private boolean available;
 
-    @OneToMany()
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "items_comments",
             joinColumns = {@JoinColumn(name = "item_id", referencedColumnName = "id")},
