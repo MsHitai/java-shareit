@@ -1,19 +1,22 @@
 package ru.practicum.shareit.item.repository;
 
-import ru.practicum.shareit.item.dto.ItemDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Map;
 
-public interface ItemRepository {
-    ItemDto save(Item item);
+@Repository
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Item findById(long itemId);
 
-    ItemDto partialUpdateItem(Map<String, Object> updates, Item itemOld);
+    @Query("select i from Item as i " +
+            "JOIN FETCH i.user as u " +
+            "where i.user.id = ?1")
+    List<Item> findAllItemsByUser(Long userId);
 
-    List<ItemDto> findAllItems(Long userId);
 
-    List<ItemDto> searchItems(String text, Long userId);
+    List<Item> searchItemsByNameOrDescriptionContainingIgnoreCase(String name, String description);
 }
