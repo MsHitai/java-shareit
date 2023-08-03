@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookerAndItemDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -18,6 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,12 +39,21 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public ItemDto saveItem(ItemDto itemDto, Long userId) {
         User user = checkUserId(userId);
         Item item = ItemMapper.mapToItem(itemDto, user);
         return ItemMapper.mapToItemDto(itemRepository.save(item));
+    }
+
+    @Override
+    public ItemDto saveItem(ItemDto itemDto, Long userId, Long requestId) {
+        User user = checkUserId(userId);
+        ItemRequest itemRequest = checkItemRequestId(requestId);
+        Item item = ItemMapper.mapToItem(itemDto, user, itemRequest);
+        return ItemMapper.mapToItemDto(itemRepository.save(item), requestId);
     }
 
     @Override
@@ -75,9 +87,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemForUserDto> findAllItems(Long userId) {
+    public List<ItemForUserDto> findAllItems(Long userId, Pageable page) {
         checkUserId(userId);
-        return itemRepository.findAllItemsByUser(userId).stream()
+        return itemRepository.findAllItemsByUserId(userId, page).stream()
                 .map(item -> findByIdForUser(item, item.getComments()
                         .stream()
                         .map(CommentMapper::mapToCommentDto)
@@ -87,9 +99,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(String text, Long userId) {
+    public List<ItemDto> searchItems(String text, Long userId, Pageable page) {
         checkUserId(userId);
-        return itemRepository.searchItemsByNameOrDescriptionContainingIgnoreCase(text, text)
+        return itemRepository.searchItemsByNameOrDescriptionContainingIgnoreCase(text, text, page)
                 .stream()
                 .filter(Item::isAvailable)
                 .map(ItemMapper::mapToItemDto)
@@ -128,6 +140,11 @@ public class ItemServiceImpl implements ItemService {
         } else {
             return user.get();
         }
+    }
+
+    private ItemRequest checkItemRequestId(Long itemRequestId) {
+        return itemRequestRepository.findById(itemRequestId).orElseThrow(() ->
+                new DataNotFoundException("Запроса по id " + itemRequestId + " нет в базе данных"));
     }
 
     private Boolean checkIfUserIsOwner(long userId, Item item) {

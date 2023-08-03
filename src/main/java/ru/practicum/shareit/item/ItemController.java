@@ -2,6 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -30,7 +32,11 @@ public class ItemController {
                             @Valid @RequestBody ItemDto itemDto) {
         log.debug("Поступил запрос POST на создание вещи {} от пользователя по id {}",
                 itemDto.toString(), userId);
-        return itemService.saveItem(itemDto, userId);
+        if (itemDto.getRequestId() == null) {
+            return itemService.saveItem(itemDto, userId);
+        } else {
+            return itemService.saveItem(itemDto, userId, itemDto.getRequestId());
+        }
     }
 
     @PatchMapping("/{itemId}")
@@ -49,19 +55,25 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemForUserDto> findAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemForUserDto> findAllItems(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @RequestParam(defaultValue = "0") int from,
+                                             @RequestParam(defaultValue = "20") int size) {
         log.debug("Получен запрос GET на получение вещей пользователя по id {}", userId);
-        return itemService.findAllItems(userId);
+        Pageable page = PageRequest.of(from, size);
+        return itemService.findAllItems(userId, page);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @RequestParam String text) {
+                                     @RequestParam String text,
+                                     @RequestParam(defaultValue = "0") int from,
+                                     @RequestParam(defaultValue = "20") int size) {
         log.debug("Получен запрос GET на поиск вещей от пользователя по id {}", userId);
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemService.searchItems(text.toLowerCase(), userId);
+        Pageable page = PageRequest.of(from, size);
+        return itemService.searchItems(text.toLowerCase(), userId, page);
     }
 
     @PostMapping("/{itemId}/comment")
