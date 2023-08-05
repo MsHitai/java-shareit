@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.repository;
 
+import lombok.NonNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -53,11 +54,13 @@ public class OffsetLimitPageable implements Pageable, Serializable {
     }
 
     @Override
+    @NonNull
     public Sort getSort() {
         return sort;
     }
 
     @Override
+    @NonNull
     public Pageable next() {
         return new OffsetLimitPageable((int) (getOffset() + getPageSize()), getPageSize(), getSort());
     }
@@ -69,16 +72,19 @@ public class OffsetLimitPageable implements Pageable, Serializable {
 
 
     @Override
+    @NonNull
     public Pageable previousOrFirst() {
         return hasPrevious() ? previous() : first();
     }
 
     @Override
+    @NonNull
     public Pageable first() {
         return new OffsetLimitPageable(0, getPageSize(), getSort());
     }
 
     @Override
+    @NonNull
     public Pageable withPage(int pageNumber) {
         return new OffsetLimitPageable(pageNumber, getPageSize(), getSort());
     }
