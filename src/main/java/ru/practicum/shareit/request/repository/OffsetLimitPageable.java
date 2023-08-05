@@ -80,7 +80,7 @@ public class OffsetLimitPageable implements Pageable, Serializable {
 
     @Override
     public Pageable withPage(int pageNumber) {
-        return null;
+        return new OffsetLimitPageable(pageNumber, getPageSize(), getSort());
     }
 
     @Override
