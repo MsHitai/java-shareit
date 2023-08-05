@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -133,13 +132,12 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.mapToCommentDto(comment);
     }
 
-    private User checkUserId(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new DataNotFoundException("Пользователя с таким id нет в базе");
-        } else {
-            return user.get();
+    private User checkUserId(long userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new DataNotFoundException("Пользователя с id " + userId + " нет в базе данных");
         }
+        return user;
     }
 
     private ItemRequest checkItemRequestId(Long itemRequestId) {

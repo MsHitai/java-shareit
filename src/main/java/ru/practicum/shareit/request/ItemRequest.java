@@ -34,8 +34,8 @@ public class ItemRequest {
     @Column(name = "created")
     private LocalDateTime created;
 
-    @OneToMany(fetch = FetchType.EAGER) // todo is it? никак не получается реализовать через мапу
-    @JoinTable(
+    @OneToMany(fetch = FetchType.EAGER) // никак не получается реализовать без Eager через мапу -
+    @JoinTable(// PSQLException: ОШИБКА: столбец items0_.items_id не существует
             name = "items_requests",
             joinColumns = {@JoinColumn(name = "request_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "item_id", referencedColumnName = "id")}
