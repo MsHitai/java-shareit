@@ -134,6 +134,15 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void testSaveItemFailWithWrongRequestId() {
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRequestRepository.findById(22L)).thenReturn(Optional.empty());
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        assertThrows(DataNotFoundException.class, () -> service.saveItem(dto, ownerId, 22L));
+    }
+
+    @Test
     void testSaveItemWithoutRequestIdNotFoundWhenWrongUserId() {
         long wrongId = 22L;
         when(userRepository.findById(wrongId)).thenThrow(new DataNotFoundException());
@@ -215,6 +224,22 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void testPartialUpdateItemFailWhenWrongItemId() {
+        dto.setName("New name");
+        dto.setDescription("New Description");
+        dto.setAvailable(false);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("available", dto.getAvailable());
+        updates.put("name", dto.getName());
+        updates.put("description", dto.getDescription());
+
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findById(22L)).thenReturn(null);
+
+        assertThrows(DataNotFoundException.class, () -> service.partialUpdateItem(updates, 22L, ownerId));
+    }
+
+    @Test
     void testFindByIdOkWhenUserIsOwner() {
         comment = Comment.builder()
                 .id(1L)
@@ -240,6 +265,17 @@ class ItemServiceImplTest {
         assertThat(result.getAvailable(), is(dto.getAvailable()));
         assertThat(actualComment.getText(), is(comment.getComment()));
         assertThat(actualComment.getCreated(), is(comment.getCreated()));
+    }
+
+    @Test
+    void testFindByIdFailWhenUserNull() {
+        when(userRepository.findById(ownerId)).thenReturn(null);
+        when(itemRepository.findById(item.getId())).thenReturn(item);
+        when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of(comment));
+        when(bookingRepository.findAllByItemAndStatusOrderByEndAsc(any(Item.class), any(Status.class)))
+                .thenReturn(new ArrayList<>());
+
+        assertThrows(DataNotFoundException.class, () -> service.findById(item.getId(), ownerId));
     }
 
     @Test

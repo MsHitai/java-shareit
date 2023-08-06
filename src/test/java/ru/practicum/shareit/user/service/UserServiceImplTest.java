@@ -91,6 +91,14 @@ class UserServiceImplTest {
     }
 
     @Test
+    void testFindByIdFailWhenWrongId() {
+        when(repository.findById(22L))
+                .thenReturn(null);
+
+        assertThrows(DataNotFoundException.class, () -> service.findById(22L));
+    }
+
+    @Test
     void testFindByIdWhenWrongIdNotFound() {
         long wrongId = 2L;
 

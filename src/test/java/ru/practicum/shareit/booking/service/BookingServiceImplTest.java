@@ -35,6 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -166,7 +167,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void testApproveBookingOk() {
+    void testApproveBookingStatusRejectedOk() {
         booking.setStatus(Status.REJECTED);
         when(userRepository.findById(ownerId)).thenReturn(owner);
         when(bookingRepository.findById(booking.getId())).thenReturn(booking);
@@ -174,6 +175,19 @@ class BookingServiceImplTest {
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
         BookingDto actualBooking = service.approveBooking(ownerId, booking.getId(), false);
+
+        assertThat(actualBooking.getStatus(), is(booking.getStatus()));
+    }
+
+    @Test
+    void testApproveBookingStatusApprovedOk() {
+        booking.setStatus(Status.WAITING);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(bookingRepository.findById(booking.getId())).thenReturn(booking);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        BookingDto actualBooking = service.approveBooking(ownerId, booking.getId(), true);
 
         assertThat(actualBooking.getStatus(), is(booking.getStatus()));
     }
@@ -228,7 +242,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void testFindAllBookingsByUser() {
+    void testFindAllBookingsByUserStatePast() {
         Pageable page = PageRequest.of(0, 20);
         when(userRepository.findById(requesterId)).thenReturn(requester);
         when(bookingRepository.findAllByBookerAndEndBeforeOrderByEndDesc(any(User.class), any(LocalDateTime.class),
@@ -246,7 +260,96 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void testFindAllBookingsByOwnerOk() {
+    void testFindAllBookingsByUserStateAll() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(requesterId)).thenReturn(requester);
+        when(bookingRepository.findAllByBookerOrderByStartDesc(any(User.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByUser(requesterId, BookingState.ALL, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByUserStateCurrent() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(requesterId)).thenReturn(requester);
+        when(bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(any(User.class),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByUser(requesterId, BookingState.CURRENT, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByUserStateFuture() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(requesterId)).thenReturn(requester);
+        when(bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(any(User.class),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByUser(requesterId, BookingState.FUTURE, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByUserStateWaiting() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(requesterId)).thenReturn(requester);
+        when(bookingRepository.findAllByBookerAndStatusEqualsOrderByStartDesc(any(User.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByUser(requesterId, BookingState.WAITING, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByUserStateRejected() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(requesterId)).thenReturn(requester);
+        when(bookingRepository.findAllByBookerAndStatusEqualsOrderByStartDesc(any(User.class),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByUser(requesterId, BookingState.REJECTED, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusWaiting() {
         Pageable page = PageRequest.of(0, 20);
         when(userRepository.findById(ownerId)).thenReturn(owner);
         when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
@@ -254,6 +357,100 @@ class BookingServiceImplTest {
                 .thenReturn(List.of(booking));
 
         List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.WAITING, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusAll() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemInOrderByStartDesc(List.of(item), page))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.ALL, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusCurrent() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemInAndStartBeforeAndEndAfterOrderByStartDesc(anyList(),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.CURRENT, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusPast() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemInAndEndBeforeOrderByEndDesc(anyList(),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.PAST, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusFuture() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemInAndStartAfterOrderByStartDesc(anyList(),
+                any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.FUTURE, page);
+        BookingDto actualBooking = resultDtos.get(0);
+
+        assertThat(resultDtos.size(), is(1));
+        assertThat(actualBooking.getId(), is(dto.getId()));
+        assertThat(actualBooking.getStart(), is(dto.getStart()));
+        assertThat(actualBooking.getEnd(), is(dto.getEnd()));
+        assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+    }
+
+    @Test
+    void testFindAllBookingsByOwnerOkStatusRejected() {
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(ownerId)).thenReturn(owner);
+        when(itemRepository.findAllItemsByUser(ownerId)).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemInAndStatusEqualsOrderByStartDesc(anyList(),
+                any(Status.class), any(Pageable.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> resultDtos = service.findAllBookingsByOwner(ownerId, BookingState.REJECTED, page);
         BookingDto actualBooking = resultDtos.get(0);
 
         assertThat(resultDtos.size(), is(1));
