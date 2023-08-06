@@ -40,7 +40,8 @@ class BookingRepositoryTest {
     private User requester;
     private Booking booking;
     private final Pageable page = PageRequest.of(0, 10);
-    private final LocalDateTime now = LocalDateTime.of(2023, Month.AUGUST, 4, 15, 16, 1);
+    private final LocalDateTime now =
+            LocalDateTime.of(2023, Month.AUGUST, 4, 15, 16, 1);
 
     @BeforeEach
     void setUp() {
