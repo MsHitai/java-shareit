@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookItemDto;
 import ru.practicum.shareit.booking.dto.BookerAndItemDto;
 import ru.practicum.shareit.booking.dto.BookerDto;
@@ -22,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
 class BookingMapperTest {
 
     private BookingDto dto;

@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
@@ -60,6 +61,11 @@ class UserControllerTest {
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .build();
+    }
+
+    @Test
+    void contextLoad() {
+        assertThat(service).isNotNull();
     }
 
     @Test

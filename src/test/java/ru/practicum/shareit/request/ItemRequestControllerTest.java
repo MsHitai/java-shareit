@@ -21,6 +21,7 @@ import java.time.Month;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
@@ -61,6 +62,11 @@ class ItemRequestControllerTest {
                 .name("test Name")
                 .items(Set.of(new Item()))
                 .build();
+    }
+
+    @Test
+    void contextLoad() {
+        assertThat(service).isNotNull();
     }
 
     @Test

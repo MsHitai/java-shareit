@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -128,6 +128,13 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .save(any(Booking.class));
+        verify(userRepository, times(1))
+                .findById(requesterId);
+        verify(itemRepository, times(1))
+                .findById(item.getId());
     }
 
     @Test
@@ -164,6 +171,11 @@ class BookingServiceImplTest {
         when(itemRepository.findById(item.getId())).thenReturn(item);
 
         assertThrows(DataNotFoundException.class, () -> service.addBooking(ownerId, dto));
+
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findById(item.getId());
     }
 
     @Test
@@ -177,6 +189,15 @@ class BookingServiceImplTest {
         BookingDto actualBooking = service.approveBooking(ownerId, booking.getId(), false);
 
         assertThat(actualBooking.getStatus(), is(booking.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .save(any(Booking.class));
+        verify(bookingRepository, times(1))
+                .findById(booking.getId());
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 
     @Test
@@ -214,6 +235,15 @@ class BookingServiceImplTest {
 
         assertThrows(ValidationException.class,
                 () -> service.approveBooking(ownerId, booking.getId(), false));
+
+        verify(bookingRepository, never())
+                .save(any(Booking.class));
+        verify(bookingRepository, times(1))
+                .findById(booking.getId());
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 
     @Test
@@ -228,6 +258,13 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findById(booking.getId());
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 
     @Test
@@ -257,6 +294,12 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findAllByBookerAndEndBeforeOrderByEndDesc(any(User.class), any(LocalDateTime.class),
+                        any(Pageable.class));
+        verify(userRepository, times(1))
+                .findById(requesterId);
     }
 
     @Test
@@ -274,6 +317,11 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findAllByBookerOrderByStartDesc(any(User.class), any(Pageable.class));
+        verify(userRepository, times(1))
+                .findById(requesterId);
     }
 
     @Test
@@ -382,6 +430,13 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findAllByItemInOrderByStartDesc(List.of(item), page);
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 
     @Test
@@ -439,6 +494,13 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findAllByItemInAndStartAfterOrderByStartDesc(anyList(), any(LocalDateTime.class), any(Pageable.class));
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 
     @Test
@@ -458,5 +520,12 @@ class BookingServiceImplTest {
         assertThat(actualBooking.getStart(), is(dto.getStart()));
         assertThat(actualBooking.getEnd(), is(dto.getEnd()));
         assertThat(actualBooking.getStatus(), is(dto.getStatus()));
+
+        verify(bookingRepository, times(1))
+                .findAllByItemInAndStatusEqualsOrderByStartDesc(anyList(), any(Status.class), any(Pageable.class));
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUser(ownerId);
     }
 }

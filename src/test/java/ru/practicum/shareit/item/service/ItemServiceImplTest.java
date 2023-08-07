@@ -38,8 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -276,6 +275,15 @@ class ItemServiceImplTest {
                 .thenReturn(new ArrayList<>());
 
         assertThrows(DataNotFoundException.class, () -> service.findById(item.getId(), ownerId));
+
+        verify(bookingRepository, never())
+                .findAllByItemAndStatusOrderByEndAsc(any(Item.class), any(Status.class));
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, never())
+                .findById(item.getId());
+        verify(commentRepository, never())
+                .findAllByItemId(item.getId());
     }
 
     @Test
@@ -292,6 +300,15 @@ class ItemServiceImplTest {
         assertThat(result.getName(), is(dto.getName()));
         assertThat(result.getDescription(), is(dto.getDescription()));
         assertThat(result.getAvailable(), is(dto.getAvailable()));
+
+        verify(bookingRepository, times(1))
+                .findAllByItemAndStatusOrderByEndAsc(any(Item.class), any(Status.class));
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findById(item.getId());
+        verify(commentRepository, times(1))
+                .findAllByItemId(item.getId());
     }
 
     @Test
@@ -311,6 +328,11 @@ class ItemServiceImplTest {
         assertThat(result.getName(), is(dto.getName()));
         assertThat(result.getDescription(), is(dto.getDescription()));
         assertThat(result.getAvailable(), is(dto.getAvailable()));
+
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUserId(ownerId, page);
     }
 
     @Test
@@ -341,6 +363,13 @@ class ItemServiceImplTest {
         assertThat(result.getDescription(), is(dto.getDescription()));
         assertThat(result.getAvailable(), is(dto.getAvailable()));
         assertThat(result.getLastBooking().getBookerId(), is(requesterId));
+
+        verify(userRepository, times(1))
+                .findById(ownerId);
+        verify(itemRepository, times(1))
+                .findAllItemsByUserId(ownerId, page);
+        verify(bookingRepository, times(1))
+                .findAllByItemAndStatusOrderByEndAsc(item, Status.APPROVED);
     }
 
     @Test
@@ -460,6 +489,14 @@ class ItemServiceImplTest {
                 any(LocalDateTime.class))).thenReturn(new ArrayList<>());
 
         assertThrows(ValidationException.class, () -> service.addComment(requesterId, item.getId(), commentDto));
+
+        verify(userRepository, times(1))
+                .findById(requesterId);
+        verify(itemRepository, times(1))
+                .findById(item.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndItemIdAndEndBeforeOrderByEndDesc(anyLong(), anyLong(),
+                        any(LocalDateTime.class));
     }
 
     @Test
@@ -487,5 +524,13 @@ class ItemServiceImplTest {
                 any(LocalDateTime.class))).thenReturn(List.of(booking1));
 
         assertThrows(ValidationException.class, () -> service.addComment(requesterId, item.getId(), commentDto));
+
+        verify(userRepository, times(1))
+                .findById(requesterId);
+        verify(itemRepository, times(1))
+                .findById(item.getId());
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndItemIdAndEndBeforeOrderByEndDesc(anyLong(), anyLong(),
+                        any(LocalDateTime.class));
     }
 }
