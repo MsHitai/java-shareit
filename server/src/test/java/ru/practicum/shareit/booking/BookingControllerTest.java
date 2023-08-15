@@ -60,8 +60,8 @@ class BookingControllerTest {
 
         dto = BookingDto.builder()
                 .itemId(1L)
-                .start(time)
-                .end(time.plusHours(2))
+                .start(time.plusMonths(2))
+                .end(time.plusMonths(3))
                 .build();
 
         userId = 1L;
