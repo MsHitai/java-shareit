@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
@@ -67,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
         long itemId = booking.getItem().getId();
         List<Item> items = itemRepository.findAllItemsByUser(userId);
         if (!checkIfUserIsOwner(items, itemId) && userId != booking.getBooker().getId()) {
-            throw new DataNotFoundException("Пользователь с id " + userId + " не владелей или не бронировал " +
+            throw new DataNotFoundException("Пользователь с id " + userId + " не владелец или не бронировал " +
                     "вещь по id " + itemId);
         }
         return BookingMapper.mapToBookingDto(booking);
