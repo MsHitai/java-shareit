@@ -2,7 +2,7 @@ version: '3.8'
 services:
   gateway:
     build:
-      context: .
+      context: gateway/Dockerfile
       dockerfile: Dockerfile
     image: mshitai/shareit-gateway:0.1
     container_name: shareit-gateway
@@ -15,7 +15,7 @@ services:
 
   server:
     build:
-      context: .
+      context: server/Dockerfile
       dockerfile: Dockerfile
     image: mshitai/shareit-server:0.1
     container_name: server
