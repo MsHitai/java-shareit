@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemForUserDto;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto saveItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @Valid @RequestBody ItemDto itemDto) {
+                            @RequestBody ItemDto itemDto) {
         log.debug("Поступил запрос POST на создание вещи {} от пользователя по id {}",
                 itemDto.toString(), userId);
         if (itemDto.getRequestId() == null) {
@@ -78,7 +77,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @Valid @RequestBody CommentDto commentDto,
+                                 @RequestBody CommentDto commentDto,
                                  @PathVariable(required = false) Long itemId) {
         log.debug("Получен запрос GET на получение комментариев для вещи по id {} от пользователя по id {}",
                 itemId, userId);

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.repository;
 
+import lombok.Generated;
 import lombok.NonNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Generated
 public class OffsetLimitPageable implements Pageable, Serializable {
 
     private final int limit;

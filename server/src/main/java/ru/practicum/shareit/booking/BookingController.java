@@ -11,7 +11,6 @@ import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.repository.OffsetLimitPageable;
 
-import javax.validation.Valid;
 import java.util.List;
 
 
@@ -29,7 +28,7 @@ public class BookingController {
 
     @PostMapping()
     public BookingDto addBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @Valid @RequestBody BookingDto bookingDto) {
+                                 @RequestBody BookingDto bookingDto) {
         log.debug("Поступил POST запрос на создание брони для вещи по id {}", bookingDto.getItemId());
         if (bookingDto.getStart().isAfter(bookingDto.getEnd())
                 || bookingDto.getStart().equals(bookingDto.getEnd())) {

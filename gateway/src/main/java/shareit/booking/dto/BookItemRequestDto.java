@@ -17,8 +17,10 @@ import java.time.LocalDateTime;
 public class BookItemRequestDto {
     @NotNull
     private long itemId;
+    @NotNull(message = "Дата начала аренды не может быть пустой")
     @FutureOrPresent
     private LocalDateTime start;
+    @NotNull(message = "Дата конца аренды не может быть пустой")
     @Future
     private LocalDateTime end;
 }

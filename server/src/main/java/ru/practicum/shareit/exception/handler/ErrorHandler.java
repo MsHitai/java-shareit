@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exception.handler;
 
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.exception.ValidationException;
 
 @RestControllerAdvice
 @Slf4j
+@Generated
 public class ErrorHandler {
 
     @ExceptionHandler

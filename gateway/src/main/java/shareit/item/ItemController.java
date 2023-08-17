@@ -63,6 +63,9 @@ public class ItemController {
                                               @Positive @RequestParam(name = "size", defaultValue = "10")
                                               Integer size) {
         log.info("Searching items by text {} for user by id {}", text, userId);
+        if (text.isBlank() || text.isEmpty()) {
+            ResponseEntity.ok().body("{\"[]\"}");
+        }
         return itemClient.searchItems(userId, text, from, size);
     }
 

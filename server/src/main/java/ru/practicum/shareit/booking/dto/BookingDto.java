@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.booking.model.Status;
 
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,15 +15,10 @@ public class BookingDto {
 
     private long id;
 
-    @NotNull
     private Long itemId;
 
-    @NotNull(message = "Дата начала аренды не может быть пустой")
-    @FutureOrPresent
     private LocalDateTime start;
 
-    @NotNull(message = "Дата конца аренды не может быть пустой")
-    @FutureOrPresent
     private LocalDateTime end;
 
     private BookerDto booker;

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.exception.DataNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -76,6 +77,20 @@ class UserServiceImplTest {
         assertThat(actualUser.getId(), is(dto.getId()));
         assertThat(actualUser.getName(), is(dto.getName()));
         assertThat(actualUser.getEmail(), is(dto.getEmail()));
+    }
+
+    @Test
+    void testSaveUserFailWhenSameEmail() {
+        User withSameEmail = User.builder()
+                .id(userId)
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .build();
+
+        when(repository.save(withSameEmail))
+                .thenThrow(DataIntegrityViolationException.class);
+
+        assertThrows(DataIntegrityViolationException.class, () -> service.saveUser(dto));
     }
 
     @Test

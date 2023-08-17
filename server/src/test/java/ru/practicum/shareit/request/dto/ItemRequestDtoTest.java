@@ -6,11 +6,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.io.IOException;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,8 +15,6 @@ class ItemRequestDtoTest {
 
     @Autowired
     private JacksonTester<ItemRequestDto> jacksonTester;
-
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     void createSuccessfulWhenValid() throws IOException {
@@ -34,17 +28,5 @@ class ItemRequestDtoTest {
         assertThat(json).extractingJsonPathNumberValue("$.id").isEqualTo(1);
         assertThat(json).extractingJsonPathStringValue("$.description")
                 .isEqualTo("Some test description");
-    }
-
-    @Test
-    void createFailWhenNullDescription() {
-        ItemRequestDto dto = ItemRequestDto.builder()
-                .id(1L)
-                .description(null)
-                .build();
-
-        Set<ConstraintViolation<ItemRequestDto>> violations = validator.validate(dto);
-
-        assertThat(violations).isNotEmpty();
     }
 }

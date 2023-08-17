@@ -528,4 +528,17 @@ class BookingServiceImplTest {
         verify(itemRepository, times(1))
                 .findAllItemsByUser(ownerId);
     }
+
+    @Test
+    void testFindAllBookingsByOwner404WhenWrongUserId() {
+        long wrongId = 22L;
+        Pageable page = PageRequest.of(0, 20);
+        when(userRepository.findById(wrongId)).thenReturn(null);
+
+        assertThrows(DataNotFoundException.class,
+                () -> service.findAllBookingsByOwner(wrongId, BookingState.ALL, page));
+
+        verify(userRepository, times(1))
+                .findById(wrongId);
+    }
 }
